@@ -10,6 +10,7 @@ from collections.abc import Iterable
 
 import clipboard_event.clipboard_watcher as clipboard_watcher
 from python_utils_aisu import utils
+import translation_utils.filters
 
 from text_handler_japanese_tts_voicevox import TextHandlerJapaneseTtsVoicevox
 
@@ -87,8 +88,10 @@ if __name__ == "__main__":
     # wait for links in clipboard
     def predicate(text):
         # this can filter new text if you want
-        # just return False when you don't want to translate it
-        return True
+        # just return empty when you don't want to translate it
+        text = translation_utils.filters.filter_fix_nl(text)
+        text = translation_utils.filters.filter_code_blocks(text, "[... code block]")
+        return text
 
     watcher = clipboard_watcher.ClipboardWatcher(
         predicate, text_thread, **settings.ClipboardWatcher_args,)

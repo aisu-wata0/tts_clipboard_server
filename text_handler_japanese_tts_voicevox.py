@@ -6,7 +6,7 @@ import logging
 from python_utils_aisu import utils, utils_japanese
 
 from text_handler import text_handler_japanese
-import translate_google_utils
+import translation_utils.tr_google
 import tts_voicevox_utils
 import tts_voicevox_settings
 
@@ -37,7 +37,7 @@ class TextHandlerJapaneseTtsVoicevox(text_handler_japanese.TextHandlerJapanese):
     def get_output(self, text_new, args):
         text_new = self.text_preprocess(text_new, args)
 
-        text_output = translate_google_utils.translateText(
+        text_output = translation_utils.tr_google.translate(
             text_new, src='en', dest='ja')
 
         text_output = self.text_postprocess(text_output, args)

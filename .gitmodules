@@ -7,3 +7,6 @@
 [submodule "text_handler"]
 	path = text_handler
 	url = git@github.com:bfs15/text_handler.git
+[submodule "translation_utils"]
+	path = translation_utils
+	url = git@github.com:bfs15/translation_utils.git
