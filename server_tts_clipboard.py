@@ -15,7 +15,7 @@ from text_handler_japanese_tts_voicevox import TextHandlerJapaneseTtsVoicevox
 
 import settings
 
-tts_handler = TextHandlerJapaneseTtsVoicevox()
+tts_handler = TextHandlerJapaneseTtsVoicevox(**settings.TextHandler_args)
 
 
 def text_thread(text):
