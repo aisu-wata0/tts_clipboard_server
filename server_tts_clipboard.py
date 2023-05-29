@@ -91,7 +91,7 @@ if __name__ == "__main__":
         return True
 
     watcher = clipboard_watcher.ClipboardWatcher(
-        predicate, text_thread, settings.clipboard_cooldown)
+        predicate, text_thread, **settings.ClipboardWatcher_args,)
 
     watcher.start()
 

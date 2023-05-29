@@ -35,18 +35,21 @@ class TextHandlerJapaneseTtsVoicevox(text_handler_japanese.TextHandlerJapanese):
         )
 
     def get_output(self, text_new, args):
-        text_new = super().get_output(text_new, args)
+        text_new = self.text_preprocess(text_new, args)
 
-        text_output = translate_google_utils.translateText(text_new, src='en', dest='ja')
-        filepath = ""
-        try:
-            if self.play_sound:
+        text_output = translate_google_utils.translateText(
+            text_new, src='en', dest='ja')
+
+        text_output = self.text_postprocess(text_output, args)
+
+        if self.play_sound:
+            filepath = ""
+            try:
                 filepath = self.voicevox.SynthesisSaveWav(text_output)
                 tts_voicevox_utils.playFile(filepath)
-        except Exception as e:
-            logging.exception(f"While playing {filepath}")
-        finally:
-            Path(filepath).unlink()
-
+            except Exception as e:
+                logging.exception(f"While playing {filepath}")
+            finally:
+                Path(filepath).unlink()
 
         return text_output
