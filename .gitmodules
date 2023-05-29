@@ -4,3 +4,6 @@
 [submodule "clipboard_event"]
 	path = clipboard_event
 	url = git@github.com:bfs15/clipboard_event.git
+[submodule "text_handler"]
+	path = text_handler
+	url = git@github.com:bfs15/text_handler.git
