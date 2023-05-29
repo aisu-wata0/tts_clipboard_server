@@ -11,27 +11,16 @@ from collections.abc import Iterable
 import clipboard_event.clipboard_watcher as clipboard_watcher
 from python_utils_aisu import utils
 
-from tts_handler import TTSHandler
+from text_handler_japanese_tts_voicevox import TextHandlerJapaneseTtsVoicevox
 
-from . import settings
+import settings
 
-tts_handler = TTSHandler(
-    formatting_necessary=False, formatting_care=False,
-    jailbreak=False,
-    max_tokens_relative_to_input=1.5,
-    print_romaji=True,
-    use_tr_cache=True,
-    start_from_history_file="",
-    history=None,
-    history_tr=None,
-    tr_cache=None,
-    history_cut=0,
-)
+tts_handler = TextHandlerJapaneseTtsVoicevox()
 
 
 def text_thread(text):
     thread = threading.Thread(
-        target=tts_handler.translate, args=(tts_handler, text,))
+        target=tts_handler.handle, args=(text,))
     return thread
 
 
@@ -43,12 +32,12 @@ app = Flask(__name__)
 translation = ""
 
 
-@app.route('/translate', methods=['GET'])
-def custom_translate():
+@app.route('/tts', methods=['GET'])
+def route_tts():
     text = request.args.get('text')
     if isinstance(text, str):
         # replace this with your actual translation function
-        translation = tts_handler.translate(text)
+        translation = tts_handler.handle(text)
         return translation
 
 
@@ -127,13 +116,7 @@ if __name__ == "__main__":
             # Clear history
             if inp == "c":
                 print('clearing history...', flush=True)
-                tts_handler.save_state(True)
-                history_og = []
-                history_tr = []
-            # Toggle jailbreak
-            if inp == "j":
-                jailbreak = not tts_handler.jailbreak
-                print(f"jailbreak {jailbreak}")
+                tts_handler.clear_history(len(tts_handler.history))
             if inp == "reload_settings":
                 print(f"reload_settings")
                 # TODO: reload and set text handler settings

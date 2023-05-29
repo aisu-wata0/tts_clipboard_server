@@ -1,7 +1,11 @@
 
-voice_vox_port = '50021'
-voice_vox_url = f'http://127.0.0.1:{voice_vox_port}'
+port = '50021'
+url = 'http://127.0.0.1:{port}'
 
-synthesis_parameters_defaults = {
+speaker_id = 0
+
+synthesis_parameters = {
 	"global-speedScale": 1.1,
 }
+
+soundfile_dir = "soundfiles"
