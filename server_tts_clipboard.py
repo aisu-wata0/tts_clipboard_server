@@ -12,12 +12,9 @@ import clipboard_event.clipboard_watcher as clipboard_watcher
 from python_utils_aisu import utils
 import translation_utils.filters
 
-from text_handler_japanese_tts_voicevox import TextHandlerJapaneseTtsVoicevox
-
 import settings
 
-tts_handler = TextHandlerJapaneseTtsVoicevox(**settings.TextHandler_args)
-
+tts_handler = settings.tts_handler
 
 def text_thread(text):
     thread = threading.Thread(
@@ -90,7 +87,9 @@ if __name__ == "__main__":
         # this can filter new text if you want
         # just return empty when you don't want to translate it
         text = translation_utils.filters.filter_fix_nl(text)
+        print(f"```translation_utils.filters.filter_code_blocks\n{text}\n```")
         text = translation_utils.filters.filter_code_blocks(text, "[... code block]")
+        print(f"```translation_utils.filters.filter_code_blocks\n{text}\n```")
         return text
 
     watcher = clipboard_watcher.ClipboardWatcher(
@@ -126,7 +125,7 @@ if __name__ == "__main__":
                 utils.reload_lib(settings)
             # Retry translation
             if inp == "r":
-                tts_handler.retry_last_translation_input()
+                tts_handler.retry_last()
             # Show history
             if inp == "s":
                 print(

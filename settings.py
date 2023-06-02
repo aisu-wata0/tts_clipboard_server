@@ -3,15 +3,25 @@
 port = 50022
 url = '127.0.0.1'
 
-import tts_voicevox_settings as tts_voicevox
+from text_handler_japanese_tts import TextHandlerJapaneseTts
 
 ClipboardWatcher_args = {
 	'queue_text_events': False,
 	'cooldown': 0.01,
 }
 
-TextHandler_args = {
-    'characters_to_spaces': ['_', '-'],
-	'camelcase_to_spaces':True,
-	'english_to_katakana':True,
-}
+
+from translation_utils import tr_google
+
+from tts.vits.tts_vits_utils import TtsVits
+from tts.voicevox.tts_voicevox_utils import TtsVoicevox
+
+tts_handler = TextHandlerJapaneseTts(**{
+    'characters_to_spaces': ['_'],
+   	'camelcase_to_spaces': True,
+   	'english_to_katakana': True,
+	'translate_before_f': tr_google.translate,
+	'tts_engine': TtsVits(),
+	# 'tts_engine': Voicevox(),
+})
+

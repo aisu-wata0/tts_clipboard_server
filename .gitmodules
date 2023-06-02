@@ -10,3 +10,6 @@
 [submodule "translation_utils"]
 	path = translation_utils
 	url = git@github.com:bfs15/translation_utils.git
+[submodule "tts"]
+	path = tts
+	url = git@github.com:bfs15/tts.git
