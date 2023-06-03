@@ -1,15 +1,22 @@
 
 #! python
 
-import threading
 import logging
+from python_utils_aisu import utils
+
+logger = utils.loggingGetLogger(__name__)
+logger.setLevel('INFO')
+utils.loggingSetFormatter()
+
+import threading
 import json
 from datetime import datetime
 from typing import Union
 from collections.abc import Iterable
 
+import sounddevice as sd
+
 import clipboard_event.clipboard_watcher as clipboard_watcher
-from python_utils_aisu import utils
 import translation_utils.filters
 
 import settings
@@ -74,6 +81,8 @@ if __name__ == "__main__":
     # Parse arguments
     args = parser.parse_args()
 
+    print(sd.query_devices())
+
     print(f"Watching clipboard.", flush=True)
     print(f"Keys:", flush=True)
     print(f"\t'q': Quit", flush=True)
@@ -87,9 +96,9 @@ if __name__ == "__main__":
         # this can filter new text if you want
         # just return empty when you don't want to translate it
         text = translation_utils.filters.filter_fix_nl(text)
-        print(f"```translation_utils.filters.filter_code_blocks\n{text}\n```")
+        logger.info(f"```translation_utils.filters.filter_code_blocks\n{text}\n```")
         text = translation_utils.filters.filter_code_blocks(text, "[... code block]")
-        print(f"```translation_utils.filters.filter_code_blocks\n{text}\n```")
+        logger.info(f"```translation_utils.filters.filter_code_blocks\n{text}\n```")
         return text
 
     watcher = clipboard_watcher.ClipboardWatcher(
@@ -141,7 +150,7 @@ if __name__ == "__main__":
                         print("")
                         print(t)
                 except Exception as e:
-                    logging.exception("Exception while printing history")
+                    logger.exception("Exception while printing history")
             if inp.isdigit():
                 tts_handler.clear_history(inp)
             # Quit / Break out
@@ -152,7 +161,7 @@ if __name__ == "__main__":
             print("Clipboard watcher interrupted.")
             break
         except Exception as e:
-            logging.exception(
+            logger.exception(
                 f"Caught exception while waitning for user input")
             pass
 
