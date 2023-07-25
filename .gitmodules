@@ -13,3 +13,9 @@
 [submodule "tts"]
 	path = tts
 	url = git@github.com:bfs15/tts.git
+[submodule "SpeechToMouthShape"]
+	path = SpeechToMouthShape
+	url = git@github.com:bfs15/SpeechToMouthShape.git
+[submodule "SentimentAnalysis"]
+	path = SentimentAnalysis
+	url = git@github.com:bfs15/SentimentAnalysis.git

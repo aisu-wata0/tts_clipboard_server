@@ -25,25 +25,42 @@ tts_handler = settings.tts_handler
 
 def text_thread(text):
     thread = threading.Thread(
-        target=tts_handler.handle, args=(text,))
+        target=tts_handler.handle, args=(text,), daemon=True)
     return thread
 
 
-from flask import Flask, request
+from flask import Flask, request, jsonify
 
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.WARN)
 app = Flask(__name__)
-translation = ""
 
 
-@app.route('/tts', methods=['GET'])
+@app.route('/tts', methods=['POST'])
 def route_tts():
+    try:
+        data = request.get_json()
+        text = data['text']
+        if isinstance(text, str):
+            # replace this with your actual translation function
+            output = tts_handler.handle(text)
+            return jsonify({
+                'output': output,
+            })
+    except Exception as e:
+        return jsonify({
+            'error': str(e)
+        }), 400
+
+
+@app.route('/tts_text', methods=['GET'])
+def route_tts_text():
     text = request.args.get('text')
     if isinstance(text, str):
         # replace this with your actual translation function
         translation = tts_handler.handle(text)
         return translation
+    return ""
 
 
 def run_flask():
@@ -54,8 +71,8 @@ from werkzeug.serving import make_server
 
 
 class ServerThread(threading.Thread):
-    def __init__(self, app):
-        threading.Thread.__init__(self)
+    def __init__(self, app, **kwargs):
+        super().__init__(**kwargs)
         self.server = make_server(settings.url, settings.port, app)
         self.ctx = app.app_context()
         self.ctx.push()
@@ -95,20 +112,22 @@ if __name__ == "__main__":
     def predicate(text):
         # this can filter new text if you want
         # just return empty when you don't want to translate it
-        text = translation_utils.filters.filter_fix_nl(text)
-        logger.info(f"```translation_utils.filters.filter_code_blocks\n{text}\n```")
-        text = translation_utils.filters.filter_code_blocks(text, "[... code block]")
-        logger.info(f"```translation_utils.filters.filter_code_blocks\n{text}\n```")
+        logger.info(f"```translation_utils.filters.filter_everything\n{text}\n```")
+        text = translation_utils.filters.filter_everything(text)
+        logger.info(f"```translation_utils.filters.filter_everything\n{text}\n```")
         return text
 
-    watcher = clipboard_watcher.ClipboardWatcher(
-        predicate, text_thread, **settings.ClipboardWatcher_args,)
+    clipboardWatcher = None
+    if settings.clipboardWatcher:
+        clipboardWatcher = clipboard_watcher.ClipboardWatcher(
+            predicate, text_thread, **settings.ClipboardWatcher_args, daemon=True)
+        clipboardWatcher.start()
 
-    watcher.start()
-
-    # flask_thread = ServerThread(app)
     flask_thread = None
-    # flask_thread.start()
+    if settings.httpServer:
+        flask_thread = ServerThread(app, daemon=True)
+        flask_thread.start()
+    
     temperature = 0.4
 
     while True:
@@ -117,13 +136,14 @@ if __name__ == "__main__":
             inp = inp.lower()
             # # Keybindings
             # Pause
-            if inp == "p":
-                print('pausing...', flush=True)
-                watcher.pause()
-            # Unpause
-            if inp == "u":
-                print('continuing...', flush=True)
-                watcher.unpause()
+            if clipboardWatcher:
+                if inp == "p":
+                    print('pausing...', flush=True)
+                    clipboardWatcher.pause()
+                # Unpause
+                if inp == "u":
+                    print('continuing...', flush=True)
+                    clipboardWatcher.unpause()
             # Clear history
             if inp == "c":
                 print('clearing history...', flush=True)
@@ -167,8 +187,10 @@ if __name__ == "__main__":
 
     print('stopping...', flush=True)
     tts_handler.save_state(True)
-    watcher.stop()
-    watcher.join()
+
+    if clipboardWatcher:
+        clipboardWatcher.stop()
+        clipboardWatcher.join()
 
     if flask_thread:
         flask_thread.shutdown()
