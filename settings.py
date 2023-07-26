@@ -4,7 +4,7 @@ port = 50022
 url = '127.0.0.1'
 
 # Inputs
-clipboardWatcher = False
+clipboardWatcher = True
 httpServer = True
 
 
@@ -21,9 +21,15 @@ from translation_utils import tr_google
 from tts.vits.tts_vits_utils import TtsVits
 from tts.voicevox.tts_voicevox_utils import TtsVoicevox
 
-devices = {
+
+# "Sound device 'None' is default, < 0 is disabled"
+# "Sound devices are listed when you run the server
+# "Base sound device"
+tts_audio_output_device = None
+# "Specific sound devices"
+tts_devices = {
     'narration': None,
-    'dialogue': 11,
+    'dialogue': None,
     'speaker-default': None,
     'default': None,
 }
@@ -59,6 +65,17 @@ tts_engine = TtsVits(
 	},
 )
 
+from SentimentAnalysis.sentiment_analysis import SentimentClassifier
+
+# Hardcoded
+sentiment_classifier = None
+# try:
+#     sentiment_classifier = SentimentClassifier()
+# except Exception as e:
+#     print(f"{e}")
+#     print("FAILED TO LOAD SENTIMENT CLASSIFIER")
+
+
 tts_handler = TextHandlerJapaneseTts(**{
     'characters_to_spaces': ['_'],
    	'camelcase_to_spaces': True,
@@ -66,9 +83,10 @@ tts_handler = TextHandlerJapaneseTts(**{
 	'translate_before_f': tr_google.translate,
 	'tts_engine': tts_engine,
 	# 'tts_engine': Voicevox(),
-	'audio_output_device': 11,
-	'audio_output_devices': devices,
-	'movement_url': "http://127.0.0.1:{port}/movement".format(port=7880),
+	'sentiment_classifier': sentiment_classifier,
+	'audio_output_device': tts_audio_output_device,
+	'audio_output_devices': tts_devices,
+	# 'movement_url': "http://127.0.0.1:{port}/movement".format(port=7880),
 	'character_name': character_name,
 })
 

@@ -22,11 +22,7 @@ import tts.voicevox.tts_voicevox_utils as tts_voicevox_utils
 from python_utils_aisu import utils, utils_japanese
 from SpeechToMouthShape import vits_japanese
 
-
 from SentimentAnalysis.sentiment_analysis import SentimentClassifier
-
-# Hardcoded
-sentiment_classifier = SentimentClassifier()
 
 @dataclass
 class TTSEvent:
@@ -66,7 +62,7 @@ class TTSEvent:
             movement_thread.start()
             # requests.post(self.movement_url, json=data)
         
-        logger.info(f"Playing file {self.soundfile.filepath}")
+        logger.info(f"Playing file {self.soundfile.filepath} at device {self.soundfile.device}")
         self.soundfile.play(delete_file=delete_file)
         if movement_thread:
             movement_thread.join()
@@ -82,8 +78,11 @@ class TTSEvent:
 
 def play_TTSEvents_from_queue(file_queue: "queue.Queue[TTSEvent | None]"):
     while True:
+        logger.info(f"TSEvents_from_queue: Waiting file")
         event = file_queue.get()
         if not event:
+            logger.info(f"TSEvents_from_queue: Ending")
+            file_queue.task_done()
             return
         event.play()
         file_queue.task_done()
@@ -106,7 +105,7 @@ class TextHandlerJapaneseTts(TextHandlerJapanese):
         tts_delay_type_change = 0.5,
         movement_url=None,
         character_name: str = "",
-        sentiment_classifier = sentiment_classifier,
+        sentiment_classifier: SentimentClassifier | None = None,
         # audio_output_async: True,
 
         # # TextHandlerJapanese
@@ -166,8 +165,10 @@ class TextHandlerJapaneseTts(TextHandlerJapanese):
         mouth_keyframes: Dict[float, str] | bool | None = None,
         audio_output_device: str | None =None
     ):
-        if ((isinstance(audio_output_device, int) and audio_output_device < 0) or 
-            (isinstance(audio_output_device, str) and not audio_output_device)):
+        if (
+            (isinstance(audio_output_device, int) and audio_output_device < 0) or 
+            (isinstance(audio_output_device, str) and not audio_output_device)
+        ):
             return None
         tts_content = t[content_key]
         logger.info(f"tts content `{tts_content}`")
@@ -193,11 +194,12 @@ class TextHandlerJapaneseTts(TextHandlerJapanese):
                 if 'name' in t and (self.character_name.lower() == t['name'].lower()):
                     mouth_keyframes = True
                     if content_key_sentiments:
-                        sentiments = self.sentiment_classifier.get(t[content_key_sentiments])
-                        print(f"content_key_sentiments {content_key_sentiments} sentiments:")
-                        for k, v in sentiments.items():
-                            print(k, v)
-                        print()
+                        if self.sentiment_classifier:
+                            sentiments = self.sentiment_classifier.get(t[content_key_sentiments])
+                            print(f"content_key_sentiments {content_key_sentiments} sentiments:")
+                            for k, v in sentiments.items():
+                                print(k, v)
+                            print()
                 return TTSEvent(
                     SoundFile(filepath, delay, device=audio_output_device),
                     sentiments=sentiments,
