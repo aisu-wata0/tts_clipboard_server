@@ -98,9 +98,14 @@ if __name__ == "__main__":
     # Parse arguments
     args = parser.parse_args()
 
+    print("Sound devices:")
     print(sd.query_devices())
 
-    print(f"Watching clipboard.", flush=True)
+    print("Sound device 'None' is default, < 0 is disabled")
+    print("Selected sound devices based on settings:")
+    print("Base sound device:", settings.tts_audio_output_device)
+    print("Specific sound devices:", settings.tts_devices)
+
     print(f"Keys:", flush=True)
     print(f"\t'q': Quit", flush=True)
     print(f"\t'p': Pause", flush=True)
@@ -119,6 +124,7 @@ if __name__ == "__main__":
 
     clipboardWatcher = None
     if settings.clipboardWatcher:
+        print(f"Watching clipboard.", flush=True)
         clipboardWatcher = clipboard_watcher.ClipboardWatcher(
             predicate, text_thread, **settings.ClipboardWatcher_args, daemon=True)
         clipboardWatcher.start()
