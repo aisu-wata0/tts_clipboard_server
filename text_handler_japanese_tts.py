@@ -182,6 +182,7 @@ class TextHandlerJapaneseTts(TextHandlerJapanese):
             except Exception as e:
                 logger.exception(f"While creating sound file {t}")
             
+            logger.info(f"tts filepath `{filepath}`")
             if filepath:
                 # Calculate the delay based on the change of t['type']
                 delay = 0
@@ -196,10 +197,9 @@ class TextHandlerJapaneseTts(TextHandlerJapanese):
                     if content_key_sentiments:
                         if self.sentiment_classifier:
                             sentiments = self.sentiment_classifier.get(t[content_key_sentiments])
-                            print(f"content_key_sentiments {content_key_sentiments} sentiments:")
+                            logger.info(f"content_key_sentiments {content_key_sentiments} sentiments:")
                             for k, v in sentiments.items():
-                                print(k, v)
-                            print()
+                                logger.info(k, v)
                 return TTSEvent(
                     SoundFile(filepath, delay, device=audio_output_device),
                     sentiments=sentiments,
